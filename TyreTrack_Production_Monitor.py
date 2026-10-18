@@ -13,6 +13,7 @@ import numpy as np
 import os
 import shutil
 import smtplib
+import no_count_replies
 import sqlite3
 import sys
 import threading
@@ -143,6 +144,7 @@ MAX_BOX_ASPECT_RATIO = 3.60
 
 RECORD_OAK_VIDEO = False
 _EMAIL_LOCK = threading.Lock()
+_LAST_REPLY_CHECK = 0.0
 _OAK_IDLE_LOCK = threading.Lock()
 _OAK_IDLE_SECONDS = 10 * 60
 _OAK_IDLE = {
@@ -530,7 +532,8 @@ def ensure_email_config():
             "[EMAIL]\n"
             "sender_email = your_gmail@gmail.com\n"
             "sender_app_password = your_app_password\n"
-            "recipient_email = recipient@example.com\n",
+            "recipient_email = recipient@example.com\n"
+            "supervisor_email = supervisor@example.com\n",
             encoding="utf-8",
         )
 
@@ -563,13 +566,25 @@ def email_settings():
     return sender, password, recipient
 
 
-def send_message(subject, body, snapshot=None):
+def supervisor_recipient():
+    """Separate supervisor address; falls back to existing report recipient."""
+    config = configparser.ConfigParser(interpolation=None)
+    config.read(EMAIL_INI, encoding="utf-8")
+    address = config.get("EMAIL", "supervisor_email", fallback="").strip()
+    if not address or "example.com" in address:
+        settings = email_settings()
+        return settings[2] if settings else ""
+    return address
+
+
+def send_message(subject, body, snapshot=None, recipient_override=None):
     settings = email_settings()
     if settings is None:
         log(f"Email waiting for configuration: {EMAIL_INI}")
         return False
 
     sender, password, recipient = settings
+    recipient = recipient_override or recipient
     message = MIMEMultipart() if snapshot and Path(snapshot).is_file() else MIMEText(body)
     if message.is_multipart():
         message.attach(MIMEText(body))
@@ -730,6 +745,10 @@ def build_hourly_report(start, end):
 
 def send_hourly_email(start, end):
     subject, body = build_hourly_report(start, end)
+    try:
+        body += "\n" + no_count_replies.summary(DB, start.strftime("%Y-%m-%d"))
+    except Exception as exc:
+        log(f"Supervisor report summary unavailable: {exc}")
     return send_message(subject, body, DASHBOARD_SNAPSHOT)
 
 
@@ -804,6 +823,11 @@ def oak_no_count_alert_tick():
             ).fetchone()[0]
 
         if newest_id != _OAK_IDLE["last_count_id"]:
+            # Close the previous No Count event when counting resumes.
+            try:
+                no_count_replies.close_incident(DB, brisbane_now().strftime("%Y-%m-%d %H:%M:%S"))
+            except Exception as exc:
+                log(f"No Count incident close failed: {exc}")
             _OAK_IDLE["last_count_id"] = newest_id
             _OAK_IDLE["since"] = now  # Reset after a genuine tyre count.
             _OAK_IDLE["sent"] = False
@@ -819,18 +843,33 @@ def oak_no_count_alert_tick():
 
         _OAK_IDLE["retry_after"] = now + 300
 
-    sent = send_message(
-        "TYRETRACK Alert - No OAK counts for 10 minutes",
-        "TYRECYCLE | TYRETRACK\n\n"
-        "No OAK tyre counts have been recorded for at least "
-        "10 minutes while OAK frames were being received.\n\n"
-        f"Checked: {brisbane_now():%Y-%m-%d %H:%M:%S} "
-        "(Brisbane time)\n\n"
-        "This does not prove that a tyre passed undetected. "
-        "Check the conveyor and the live camera view.\n"
-        f"No-count monitoring since: {brisbane_now() - timedelta(seconds=now-since):%Y-%m-%d %H:%M:%S} Brisbane\n"
-        f"Alert threshold reached: {brisbane_now() - timedelta(seconds=max(0,now-since-600)):%Y-%m-%d %H:%M:%S} Brisbane\n",
+    threshold_at = brisbane_now()
+    incident_start = threshold_at - timedelta(seconds=now-since)
+    incident_id = f"NC-{incident_start:%Y%m%d-%H%M%S}"
+    body = (
+        "TYRECYCLE | TYRETRACK - SUPERVISOR NO COUNT REPORT\n\n"
+        f"Incident ID: {incident_id}\n"
+        f"No counts since: {incident_start:%Y-%m-%d %H:%M:%S} Brisbane\n"
+        f"Alert raised: {threshold_at:%Y-%m-%d %H:%M:%S} Brisbane\n"
+        "No OAK tyre counts for at least 10 minutes while live frames were received.\n"
+        "This does not prove that a tyre passed undetected.\n\n"
+        "SUPERVISOR: Please REPLY to this email. Complete these three lines "
+        "at the TOP of your reply (keep the incident ID in the subject):\n\n"
+        "Reason: [Waiting for tyres / Scheduled break / Conveyor stopped / Maintenance / "
+        "Conveyor blockage / Camera issue / Other]\n"
+        "Supervisor: [Your name]\n"
+        "Comments: [Optional details]\n\n"
+        "Please do not remove the incident ID from the subject.\n"
     )
+    sent = send_message(f"TYRETRACK NO COUNT {incident_id} - Supervisor response required", body,
+                        recipient_override=supervisor_recipient())
+    if sent:
+        try:
+            no_count_replies.create_incident(DB, incident_id,
+                incident_start.strftime("%Y-%m-%d %H:%M:%S"),
+                threshold_at.strftime("%Y-%m-%d %H:%M:%S"))
+        except Exception as exc:
+            log(f"No Count incident persistence failed: {exc}")
 
     if sent:
         with _OAK_IDLE_LOCK:
@@ -857,6 +896,10 @@ def send_daily_production_email(now):
             f"No-count incidents (10+ minutes): {metrics['no_count_incidents']}\n"
             f"No-flow time in incidents: {metrics['no_flow_minutes']:.1f} minutes\n"
             "Camera availability and missed detections are not verified by counts alone.\n")
+    try:
+        body += "\n" + no_count_replies.summary(DB, now.strftime("%Y-%m-%d"))
+    except Exception as exc:
+        log(f"Supervisor report summary unavailable: {exc}")
     return send_message(f"TYRETRACK Daily Production - {now:%Y-%m-%d}", body, DASHBOARD_SNAPSHOT)
 
 
@@ -869,6 +912,17 @@ def process_scheduled_emails(now):
     if not _EMAIL_LOCK.acquire(blocking=False):
         return
     try:
+        global _LAST_REPLY_CHECK
+        # Inbox failures must never stop outgoing production reports.
+        if time.monotonic() - _LAST_REPLY_CHECK >= 120:
+            _LAST_REPLY_CHECK = time.monotonic()
+            settings = email_settings()
+            if settings is not None:
+                sender, password, _ = settings
+                try:
+                    no_count_replies.check_gmail(DB, sender, password, supervisor_recipient(), log)
+                except Exception as exc:
+                    log(f"Supervisor Gmail reply check failed (outgoing reports continue): {exc}")
         if now.tzinfo is not None:
             now = now.astimezone(timezone(timedelta(hours=10))).replace(tzinfo=None)
         oak_no_count_alert_tick()

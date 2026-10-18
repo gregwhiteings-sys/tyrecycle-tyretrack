@@ -1,0 +1,53 @@
+TYRETRACK - SUPERVISOR NO COUNT EMAIL REPLIES
+============================================
+
+This package adds an email reply workflow to the existing Gmail account.
+It does not create a new Gmail account or change existing hourly recipients.
+
+1. On the yard PC, open the existing data/private_config/email_config.ini
+   (the same file used by TyreTrack's hourly email reports).
+
+   [EMAIL]
+   sender_email = existing_tyetrack_gmail@gmail.com
+   sender_app_password = existing_app_password
+   recipient_email = management@example.com
+   supervisor_email = supervisor@example.com
+
+   Only set supervisor_email to the real supervisor's email address.
+   If omitted, the existing recipient_email is used for supervisor forms.
+   Do not put real passwords into GitHub or share them in screenshots.
+
+2. Gmail inbox must permit IMAP and the existing credential must have
+   permission to read incoming messages. Google account policies vary;
+   app passwords are not available on all accounts. If the existing
+   SMTP password cannot log into IMAP, incoming processing won't work
+   until Gmail authentication is configured appropriately.
+
+3. When OAK frames are flowing but no production tyres are counted for
+   ten minutes during the Brisbane weekday shift, TyreTrack emails ONE
+   form per uninterrupted incident with a unique NC-YYYYMMDD-HHMMSS ID.
+
+4. The supervisor REPLIES with these lines at the TOP of the reply:
+
+   Reason: Waiting for tyres
+   Supervisor: John
+   Comments: Delivery was delayed
+
+   Keep the incident ID in the subject. Comments are optional.
+
+5. TyreTrack checks unread inbox messages approximately every two minutes
+   while its email scheduler is running. It accepts responses ONLY from
+   the configured supervisor_email sender. The reply is stored in SQLite
+   and appended to hourly/daily production emails.
+
+6. If IMAP fails, outgoing hourly/daily reports still run. TyreTrack
+   logs the IMAP failure and retries later. Replies remain in Gmail.
+
+LIMITATIONS / PRODUCTION CHECKS
+- The email reply system has passed offline parser/SQLite tests only.
+- Gmail login, actual incoming email, Windows EXE and live OAK-D have not
+  been tested in this environment.
+- Only unread replies are scanned; avoid manually marking replies read
+  before TyreTrack imports them.
+- The form is a plain text email, not an interactive HTML form.
+- Existing production build should remain installed until a full test.

@@ -45,7 +45,7 @@ def main():
     command=[sys.executable,'-m','PyInstaller','--noconfirm','--clean','--onedir','--windowed',
              '--name','TyreTrack','--paths',ROOT,'--noupx',
              '--hidden-import','oak_recording','--collect-all','av','--hidden-import','background_export','--hidden-import','oak_rvc2','--hidden-import','oak_hardware_test','--hidden-import','oak_ai','--hidden-import','count_line','--hidden-import','hourly_dashboard',
-             '--hidden-import','build_support.smoke_test','--hidden-import','foreign_alarm',
+             '--hidden-import','build_support.smoke_test','--hidden-import','foreign_alarm','--hidden-import','no_count_replies',
              '--hidden-import','ultralytics.nn.tasks',
              '--hidden-import','ultralytics.trackers.byte_tracker',
              '--hidden-import','ultralytics.trackers.bot_sort',
