@@ -1,0 +1,90 @@
+name: TyreTrack Windows Portable (OAK Onboard AI)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-portable:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      PYTHONUTF8: '1'
+      OMP_NUM_THREADS: '2'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python 3.12.10 x64
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+          architecture: x64
+
+      - name: Verify repository layout
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force build_logs | Out-Null
+          $required = @('TyreTrack_Production_Monitor.py','tyre_detector.pt','count_line.py','hourly_dashboard.py','BUILD_WINDOWS.py','requirements-windows.txt','build_support/smoke_test.py','foreign_alarm.py','oak_ai.py','oak_recording.py','oak_rvc2.py','oak_hardware_test.py','rvc2_models/sha256.json','background_export.py','tyre_detector_oak.blob','foreign_model/foreign_object.pt')
+          foreach ($path in $required) {
+            if (!(Test-Path -LiteralPath $path)) { throw "Missing repository-root file: $path. Extract the source ZIP before uploading; do not upload only the ZIP." }
+          }
+
+      - name: Install pinned CPU dependencies
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -m pip install --upgrade pip setuptools wheel
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip install torch==2.5.1+cpu torchvision==0.20.1+cpu --index-url https://download.pytorch.org/whl/cpu
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip install --only-binary=:all: -r requirements-windows.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip freeze | Out-File -Encoding utf8 build_logs/installed-versions.txt
+
+      - name: Download official VC++ x64 runtime installer
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Invoke-WebRequest 'https://aka.ms/vs/17/release/vc_redist.x64.exe' -OutFile vc_redist.x64.exe
+          $signature = Get-AuthenticodeSignature -FilePath vc_redist.x64.exe
+          if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch 'Microsoft Corporation') {
+            throw 'VC++ runtime installer signature verification failed'
+          }
+
+      - name: Validate application logic (90-second timeout per test)
+        timeout-minutes: 28
+        run: |
+          python -u run_ci_tests.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build EXE and test packaged imports, model, tracker and UI
+        run: python BUILD_WINDOWS.py
+
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TyreTrack-Build-Diagnostics
+          path: |
+            build_logs/
+            build/TyreTrack/warn-TyreTrack.txt
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload portable Windows application
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TyreTrack-Windows-x64-Portable
+          path: release/TyreTrack-Windows-x64-Portable.zip
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
