@@ -104,6 +104,9 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QSlider,
     QTabWidget,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
     QVBoxLayout,
     QWidget,
 )
@@ -2917,6 +2920,11 @@ class Main(QMainWindow):
             self.open_oak_recordings
         )
 
+        supervisor_btn = QPushButton("Supervisor No Count Reports")
+        supervisor_btn.setToolTip("View supervisor replies, outstanding incidents and comments")
+        supervisor_btn.clicked.connect(self.open_supervisor_reports)
+        reports_layout.addWidget(supervisor_btn)
+
         reports_layout.addWidget(export_btn)
         reports_layout.addWidget(
             self.reset_btn
@@ -3241,6 +3249,97 @@ class Main(QMainWindow):
             "Hide controls"
             if visible else "Show controls"
         )
+
+    def open_supervisor_reports(self):
+        """Read-only incident register; does not interfere with counting or Gmail."""
+        dialog = QDialog(self)
+        dialog.setWindowTitle("TyreTrack | Supervisor No Count Reports")
+        dialog.resize(1050, 610)
+        layout = QVBoxLayout(dialog)
+        heading = QLabel("SUPERVISOR NO COUNT REPORTS")
+        heading.setStyleSheet("font-size: 19px; font-weight: bold;")
+        layout.addWidget(heading)
+        summary_label = QLabel("Loading incidents…")
+        layout.addWidget(summary_label)
+        controls = QHBoxLayout()
+        today_only = QCheckBox("Today only (Brisbane)")
+        today_only.setChecked(True)
+        refresh = QPushButton("Refresh")
+        controls.addWidget(today_only)
+        controls.addStretch()
+        controls.addWidget(refresh)
+        layout.addLayout(controls)
+        table = QTableWidget(0, 7)
+        table.setHorizontalHeaderLabels(["Incident ID", "Started (Brisbane)", "Duration", "Status", "Reason", "Supervisor", "Comments"])
+        table.setEditTriggers(QTableWidget.NoEditTriggers)
+        table.setSelectionBehavior(QTableWidget.SelectRows)
+        table.setAlternatingRowColors(True)
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
+        table.horizontalHeader().setStretchLastSection(True)
+        table.setColumnWidth(0, 195)
+        table.setColumnWidth(1, 155)
+        table.setColumnWidth(2, 100)
+        table.setColumnWidth(3, 150)
+        table.setColumnWidth(4, 160)
+        table.setColumnWidth(5, 125)
+        layout.addWidget(table)
+        detail = QLabel("Select an incident to view its full comments.")
+        detail.setWordWrap(True)
+        layout.addWidget(detail)
+
+        def load_rows():
+            try:
+                # Database connection is always closed before returning to Qt.
+                with no_count_replies.db_connection(DB) as con:
+                    no_count_replies.ensure_table(con)
+                    sql = ("SELECT incident_id, started_brisbane, ended_brisbane, "
+                           "status, COALESCE(reason,''), COALESCE(supervisor,''), "
+                           "COALESCE(comments,'') FROM supervisor_no_count")
+                    params = ()
+                    if today_only.isChecked():
+                        sql += " WHERE started_brisbane LIKE ?"
+                        params = (brisbane_now().strftime('%Y-%m-%d') + '%',)
+                    sql += " ORDER BY started_brisbane DESC LIMIT 2000"
+                    rows = con.execute(sql, params).fetchall()
+                table.setRowCount(len(rows))
+                complete = 0
+                for row_i, (incident, started, ended, status, reason, supervisor, comments) in enumerate(rows):
+                    complete += status == 'COMPLETED'
+                    duration = 'Ongoing'
+                    if ended:
+                        try:
+                            minutes = max(0, int((datetime.fromisoformat(ended) - datetime.fromisoformat(started)).total_seconds() // 60))
+                            duration = f'{minutes // 60}h {minutes % 60}m'
+                        except (ValueError, TypeError):
+                            duration = 'Unknown'
+                    values = (incident, started, duration, status, reason or 'Awaiting reply', supervisor or '—', comments)
+                    for col_i, value in enumerate(values):
+                        cell = QTableWidgetItem(str(value))
+                        cell.setToolTip(str(value))
+                        table.setItem(row_i, col_i, cell)
+                summary_label.setText(f"Incidents: {len(rows)}    Completed: {complete}    Awaiting reply: {len(rows)-complete}")
+                detail.setText("Select an incident to view its full comments.")
+            except Exception as exc:
+                summary_label.setText("Unable to read supervisor incidents")
+                detail.setText(str(exc))
+                log(f"Supervisor incident viewer failed: {exc}")
+
+        def show_details():
+            row = table.currentRow()
+            if row >= 0:
+                ident = table.item(row, 0)
+                comments = table.item(row, 6)
+                detail.setText(f"{ident.text() if ident else ''} — Comments: {comments.text() if comments and comments.text() else 'None supplied'}")
+
+        refresh.clicked.connect(load_rows)
+        today_only.toggled.connect(load_rows)
+        table.itemSelectionChanged.connect(show_details)
+        # Refresh while visible to show new Gmail replies without reopening.
+        timer = QTimer(dialog)
+        timer.timeout.connect(load_rows)
+        timer.start(30000)
+        load_rows()
+        dialog.exec_()
 
     def open_fullscreen(self):
         if self.fullscreen_dialog is not None:
