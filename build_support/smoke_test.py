@@ -3,6 +3,34 @@ import json,os,sys,traceback
 from pathlib import Path
 
 def run(app_module, output):
+    # CI build smoke: verify the packaged runtime without running CPU-intensive
+    # YOLO inference or initializing an OAK camera. Full regression tests run
+    # separately in run_ci_tests.py and hardware is tested on site.
+    if os.environ.get("TYRETRACK_SMOKE_LEVEL") == "quick":
+        try:
+            print("SMOKE: checking bundled resources", flush=True)
+            resources = ["tyre_detector.pt", "tyre_detector_oak.blob",
+                         "foreign_model/foreign_object.pt", "rvc2_models/sha256.json"]
+            for name in resources:
+                path = Path(app_module.resource_path(name))
+                if not path.is_file() or path.stat().st_size == 0:
+                    raise RuntimeError(f"Missing or empty required resource: {name} ({path})")
+                print(f"SMOKE: OK {name}", flush=True)
+            print("SMOKE: initializing Qt offscreen", flush=True)
+            from PyQt5.QtWidgets import QApplication
+            qt = QApplication.instance() or QApplication([])
+            qt.processEvents()
+            payload = {"status": "passed", "level": "quick", "checks":
+                       ["application imports", "model and OAK resources", "Qt initialization"],
+                       "note": "AI inference, camera operation and full GUI layout are not verified by this quick smoke test"}
+            Path(output).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+            print("SMOKE: PASSED", flush=True)
+            return 0
+        except Exception:
+            error = traceback.format_exc()
+            print(error, flush=True)
+            Path(output).write_text(json.dumps({"status":"failed", "level":"quick", "traceback":error}, indent=2), encoding="utf-8")
+            return 1
     stage="dependency imports"
     try:
         import torch,torchvision,cv2,depthai,lap,optree,av,numpy as np

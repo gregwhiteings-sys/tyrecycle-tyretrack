@@ -10,10 +10,20 @@ def run(args):
 def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 
 def smoke(command,result,env,cwd,timeout):
-    completed=subprocess.run([str(x) for x in command],cwd=cwd,env=env,timeout=timeout,
-                             stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,encoding="utf-8",errors="replace")
-    result.with_suffix('.stdout.txt').write_text(completed.stdout,encoding="utf-8")
-    print(completed.stdout,flush=True)
+    print(f"SMOKE: launching {command[0]} (timeout {timeout}s)", flush=True)
+    try:
+        completed=subprocess.run([str(x) for x in command],cwd=cwd,env=env,timeout=timeout,
+                                 stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,
+                                 encoding="utf-8",errors="replace")
+        output=completed.stdout or ""
+    except subprocess.TimeoutExpired as exc:
+        output=exc.stdout or b""
+        if isinstance(output,bytes): output=output.decode("utf-8","replace")
+        result.with_suffix('.stdout.txt').write_text(output+f"\nTIMEOUT after {timeout} seconds\n",encoding="utf-8")
+        print(output[-16000:],flush=True)
+        raise RuntimeError(f"Smoke test exceeded {timeout}s; see build_logs/{result.stem}.stdout.txt") from exc
+    result.with_suffix('.stdout.txt').write_text(output,encoding="utf-8")
+    print(output[-16000:],flush=True)
     if result.exists():
         print(result.read_text(encoding="utf-8"),flush=True)
     else:
@@ -28,10 +38,10 @@ def main():
         raise RuntimeError('Windows x64 Python 3.12 required')
     LOGS.mkdir(exist_ok=True)
     # Source probe gives a useful diagnostic before spending time freezing.
-    env=os.environ.copy();env['QT_QPA_PLATFORM']='offscreen';env['OMP_NUM_THREADS']='2'
+    env=os.environ.copy();env['QT_QPA_PLATFORM']='offscreen';env['OMP_NUM_THREADS']='2';env['TYRETRACK_SMOKE_LEVEL']='quick';env['PYTHONUNBUFFERED']='1'
     source_result=LOGS/'source-smoke.json'
     run([sys.executable,'-m','compileall','-q','TyreTrack_Production_Monitor.py','count_line.py','hourly_dashboard.py','foreign_alarm.py','oak_rvc2.py','oak_hardware_test.py','oak_ai.py','oak_recording.py','background_export.py','build_support'])
-    smoke([sys.executable,ROOT/'TyreTrack_Production_Monitor.py','--build-smoke-test',source_result],source_result,env,ROOT,240)
+    smoke([sys.executable,ROOT/'TyreTrack_Production_Monitor.py','--build-smoke-test',source_result],source_result,env,ROOT,180)
     command=[sys.executable,'-m','PyInstaller','--noconfirm','--clean','--onedir','--windowed',
              '--name','TyreTrack','--paths',ROOT,'--noupx',
              '--hidden-import','oak_recording','--collect-all','av','--hidden-import','background_export','--hidden-import','oak_rvc2','--hidden-import','oak_hardware_test','--hidden-import','oak_ai','--hidden-import','count_line','--hidden-import','hourly_dashboard',
@@ -70,7 +80,7 @@ def main():
     result=LOGS/'packaged-smoke.json'
     # Test from an unrelated working directory to catch resource-path assumptions.
     unrelated=LOGS/'unrelated_cwd';unrelated.mkdir(exist_ok=True)
-    smoke([BUNDLE/'TyreTrack.exe','--build-smoke-test',result],result,env,unrelated,300)
+    smoke([BUNDLE/'TyreTrack.exe','--build-smoke-test',result],result,env,unrelated,180)
     assert json.loads(result.read_text())['status']=='passed'
     # Smoke-test DB and auto-generated email template must never ship as user data.
     for name in ['data','reports']:
