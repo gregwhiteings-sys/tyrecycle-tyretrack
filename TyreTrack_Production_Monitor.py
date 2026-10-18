@@ -3858,6 +3858,13 @@ class Main(QMainWindow):
         # SQLite already contains the count. The existing 1-second timer refreshes cards;
         # never scan all reports or write CSV synchronously for every crossing.
 
+    @staticmethod
+    def _slot_minutes(slot):
+        """Duration for both datetime production slots and float video-test slots."""
+        duration = slot["end"] - slot["start"]
+        seconds = duration.total_seconds() if hasattr(duration, "total_seconds") else float(duration)
+        return max(seconds / 60.0, 1.0 / 60.0)
+
     def refresh_production_hours(self, test_mode=False, test_seconds=0.0):
         if test_mode:
             # Recorded footage uses a virtual production clock beginning at 05:00.
@@ -3883,7 +3890,7 @@ class Main(QMainWindow):
         average = (sum(slot['count'] for slot in completed_slots) / len(completed_slots)) if completed_slots else 0.0
         self.production_average.setText(f"{average:,.1f} tyres/hr")
         # Best sustained flow measured across completed hourly slots, including zero-count hours.
-        flow = max((slot['count'] / max((slot['end'] - slot['start']).total_seconds() / 60, 1/60)
+        flow = max((slot['count'] / self._slot_minutes(slot)
                     for slot in completed_slots), default=0.0)
         self.production_flow_best.setText(f"{flow:.2f} tyres per min")
         self.session_lbl.setText(str(best['count'] if best else 0))
@@ -4199,8 +4206,12 @@ class Main(QMainWindow):
         self.line_changed()
 
     def tick(self):
-        self.alarm_tick()
-        self.schedule_tick()
+        for task_name, task in (("Alarm timer", self.alarm_tick),
+                                ("Auto-schedule timer", self.schedule_tick)):
+            try:
+                task()
+            except Exception:
+                log(task_name + " failed (dashboard remains open):\n" + traceback.format_exc())
         refresh_started = time.monotonic()
         try:
             self.refresh_counts()
@@ -4284,6 +4295,12 @@ if __name__ == "__main__":
         output = sys.argv[sys.argv.index("--build-smoke-test") + 1]
         sys.exit(run(sys.modules[__name__], output))
 
+    def _uncaught_exception(exc_type, exc_value, exc_tb):
+        details = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+        log("UNHANDLED APPLICATION ERROR:\n" + details)
+        sys.__excepthook__(exc_type, exc_value, exc_tb)
+
+    sys.excepthook = _uncaught_exception
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
