@@ -1,0 +1,27 @@
+{
+  "offline_checks_passed": 17,
+  "source_python_syntax": "passed",
+  "windows_build_configuration": "checked",
+  "source_smoke": {
+    "status": "passed",
+    "torch": "2.5.1+cpu",
+    "torchvision": "0.20.1+cpu",
+    "numpy": "1.26.4",
+    "depthai": "2.30.0.0",
+    "checks": [
+      "imports",
+      "H264-native-remux-and-MP4-playback",
+      "scipy",
+      "torchvision-nms",
+      "bundled-detection-model",
+      "CPU-inference-and-ByteTrack",
+      "OAK-blob-pipeline-and-tracker",
+      "foreign-model-CPU-inference",
+      "Qt-controls-layout"
+    ]
+  },
+  "red_dot_counting": "bounding-box centre; first observed frame beyond line; stable approach; once per ByteTrack ID",
+  "windows_executable_build": "NOT RUN - Windows required",
+  "physical_oak_test": "NOT RUN - OAK-D S2 required",
+  "windows_line_endings": "LF/CRLF accepted; real JSON changes and BLOB corruption rejected"
+}

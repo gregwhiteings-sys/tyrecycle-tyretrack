@@ -1,0 +1,87 @@
+[
+  {
+    "test": "oak_rvc2_test.py",
+    "passed": true,
+    "output": "[2026-10-16 21:06:09.024] [depthai] [warning] USB protocol not available - If running in a container, make sure that the following is set: \"-v /dev/bus/usb:/dev/bus/usb --device-cgroup-rule='c 189:* rmw'\"\nPASS: detection-only actual compiled contracts; four pipeline combinations; 384 RGB tyre/416 BGR foreign; full view; NMS; no masks; ByteTrack continuity; both foreign alarm classes\n"
+  },
+  {
+    "test": "oak_fov_test.py",
+    "passed": true,
+    "output": "[2026-10-16 21:06:11.846] [depthai] [warning] USB protocol not available - If running in a container, make sure that the following is set: \"-v /dev/bus/usb:/dev/bus/usb --device-cgroup-rule='c 189:* rmw'\"\nPASS: recording False sensor 1920x1080; ISP/video (1920, 1080) preview 480x270; no ISP-to-video crop\nPASS: recording True sensor 1920x1080; ISP/video (640, 360) preview 480x270; no ISP-to-video crop\n"
+  },
+  {
+    "test": "oak_recording_test.py",
+    "passed": true,
+    "output": "OAK recording started: /tmp/tmprt5lsbrv/2026-10-16/OAK_RGB_20261016_050000_000000.h264; H264 encoded on OAK, MP4 finalised at segment close\nOAK recording closed: /tmp/tmprt5lsbrv/2026-10-16/OAK_RGB_20261016_050000_000000.mp4; frames=15; stream-copy only, no PC encoding\nOAK recording started: /tmp/tmprt5lsbrv/2026-10-16/OAK_RGB_20261016_050001_000000.h264; H264 encoded on OAK, MP4 finalised at segment close\nOAK recording closed: /tmp/tmprt5lsbrv/2026-10-16/OAK_RGB_20261016_050001_000000.mp4; frames=15; stream-copy only, no PC encoding\nOAK recording started: /tmp/tmprt5lsbrv/2026-10-16/OAK_RGB_20261016_050002_000000.h264; H264 encoded on OAK, MP4 finalised at segment close\nOAK recording closed: /tmp/tmprt5lsbrv/2026-10-16/OAK_RGB_20261016_050002_000000.mp4; frames=15; stream-copy only, no PC encoding\nPASS: keyframe-aligned segments, 45 decoded frames, correct dimensions and increasing timestamps\nOAK recording started: /tmp/tmp53xdwcvs/2026-10-16/OAK_RGB_20261016_050000_000000.h264; H264 encoded on OAK, MP4 finalised at segment close\nOAK H264 recording packet gap; closing segment and waiting for keyframe\nOAK recording closed: /tmp/tmp53xdwcvs/2026-10-16/OAK_RGB_20261016_050000_000000.mp4; frames=7; stream-copy only, no PC encoding\nOAK recording started: /tmp/tmp53xdwcvs/2026-10-16/OAK_RGB_20261016_050001_000000.h264; H264 encoded on OAK, MP4 finalised at segment close\nOAK recording closed: /tmp/tmp53xdwcvs/2026-10-16/OAK_RGB_20261016_050001_000000.mp4; frames=30; stream-copy only, no PC encoding\nPASS: dropped packet ends segment; recording resumes at next decodable keyframe\nOAK recording started: /tmp/tmpgwyfnqzb/2026-10-16/OAK_RGB_20261016_050002_000000.h264; H264 encoded on OAK, MP4 finalised at segment close\nOAK recording closed: /tmp/tmpgwyfnqzb/2026-10-16/OAK_RGB_20261016_050002_000000.mp4; frames=15; stream-copy only, no PC encoding\nPASS: enabling midstream waits for a keyframe\nPASS: recording disabled creates no files\nPASS: failed MP4 finalisation preserves original H264 for recovery\n"
+  },
+  {
+    "test": "gui_render_test.py",
+    "passed": true,
+    "output": "PASS: BGR colours, native paint, aspect ratio, one fullscreen conversion/shared frame, nonblocking coalesced exports and error recovery\nQStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'\n"
+  },
+  {
+    "test": "dashboard_async_test.py",
+    "passed": true,
+    "output": "[2026-10-16 21:06:13.404] [depthai] [warning] USB protocol not available - If running in a container, make sure that the following is set: \"-v /dev/bus/usb:/dev/bus/usb --device-cgroup-rule='c 189:* rmw'\"\nPASS: background database snapshot, responsive GUI during slow read, snapshot applied to counters and clean close\nQStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'\n"
+  },
+  {
+    "test": "oak_ai_test.py",
+    "passed": true,
+    "output": "[2026-10-16 21:06:14.263] [depthai] [warning] USB protocol not available - If running in a container, make sure that the following is set: \"-v /dev/bus/usb:/dev/bus/usb --device-cgroup-rule='c 189:* rmw'\"\nPASS: decode/NMS, letterbox geometry, padding rejection, malformed/empty output, ID continuity, missed frame recovery, blob hash and pipeline construction\n"
+  },
+  {
+    "test": "oak_stream_test.py",
+    "passed": true,
+    "output": "[2026-10-16 21:06:18.230] [depthai] [warning] USB protocol not available - If running in a container, make sure that the following is set: \"-v /dev/bus/usb:/dev/bus/usb --device-cgroup-rule='c 189:* rmw'\"\nPASS: independent preview, exact AI sequence match, no unmatched publication, periodic timing summary, clean thread shutdown\nPASS: actual OakSource recording thread writes and finalises playable MP4 on shutdown\nPASS: independent foreign/tyre sequence pairing, no replay confirmation, foreign stream stall detection\n"
+  },
+  {
+    "test": "tyretrack_report_sync_test.py",
+    "passed": true,
+    "output": "PASS: 05:00\u201306:00 hourly count is 3\nPASS: Hourly classes reconcile 1+1+1=3\nPASS: Video source excluded\nPASS: Previous day excluded from daily\nPASS: All-time includes only OAK records\nPASS: Report matches database hourly count\nPASS: Report matches database daily count\nPASS: Report includes hourly and daily breakdowns\nPASS: Hourly flow rate uses elapsed period\nPASS: Brisbane timezone stated\nPASS: 06:00\u201307:00 hour contains one tyre\nPASS: Final 5-minute slot contains one tyre\nPASS: 17:06 excluded from final period\nPASS: Final-slot flow rate divides by 5 minutes\nPASS: Daily classification totals reconcile\nPASS: Hourly classification totals reconcile\n\n16/16 checks passed\n"
+  },
+  {
+    "test": "schedule_metrics_test.py",
+    "passed": true,
+    "output": "PASS: best daily excludes tests and out-of-shift counts; alert timestamp at 05:10\nPASS: auto start, retry throttle, manual pause, video isolation, scheduled stop\nPASS: 04:59:59 / 05:00 / 17:04:59 / 17:05 Brisbane boundaries\n"
+  },
+  {
+    "test": "single_line_test.py",
+    "passed": true,
+    "output": "PASS: removed-line crossing ignored; single crossing counts once; reverse direction; segment bounds; stale track; second-line controls removed\nPASS: red-dot centre geometry; first frame beyond line; exact-line touch ignored; once-per-ID; approach jitter rejected\n"
+  },
+  {
+    "test": "foreign_alarm_test.py",
+    "passed": true,
+    "output": "PASS: confirmation, spatial matching, gaps, ROI exclusion, password hash and persistent latch\n"
+  },
+  {
+    "test": "after_hours_test.py",
+    "passed": true,
+    "output": "PASS: manual bypass at night, no early stop, next-05:00 handover and automatic production restart\nPASS: manual counts saved in separate test DB; production writes unchanged\n"
+  },
+  {
+    "test": "control_layout_test.py",
+    "passed": true,
+    "output": "[2026-10-16 21:06:23.017] [depthai] [warning] USB protocol not available - If running in a container, make sure that the following is set: \"-v /dev/bus/usb:/dev/bus/usb --device-cgroup-rule='c 189:* rmw'\"\nPASS 1366 768 CAMERA page/viewport 342\nPASS 1366 768 FOREIGN page/viewport 342\nPASS 1366 768 COUNTING page/viewport 342\nPASS 1366 768 REPORTS page/viewport 356\nPASS 1366 768 PERFORMANCE page/viewport 356\nPASS 1366 768 two-line hour labels clear of scrollbar\nPASS 1280 720 CAMERA page/viewport 342\nPASS 1280 720 FOREIGN page/viewport 342\nPASS 1280 720 COUNTING page/viewport 342\nPASS 1280 720 REPORTS page/viewport 356\nPASS 1280 720 PERFORMANCE page/viewport 342\nPASS 1280 720 two-line hour labels clear of scrollbar\nPASS 1100 760 CAMERA page/viewport 342\nPASS 1100 760 FOREIGN page/viewport 342\nPASS 1100 760 COUNTING page/viewport 342\nPASS 1100 760 REPORTS page/viewport 356\nPASS 1100 760 PERFORMANCE page/viewport 342\nPASS 1100 760 two-line hour labels clear of scrollbar\nPASS: low flow flashes red below 5; 5 and above restore normal colour\nQStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'\nThis plugin does not support propagateSizeHints()\nThis plugin does not support propagateSizeHints()\n"
+  },
+  {
+    "test": "oak_worker_test.py",
+    "passed": true,
+    "output": "[2026-10-16 21:06:56.118] [depthai] [warning] USB protocol not available - If running in a container, make sure that the following is set: \"-v /dev/bus/usb:/dev/bus/usb --device-cgroup-rule='c 189:* rmw'\"\nPASS: actual ByteTrack worker counts on red-dot centre crossing, not box bottom\nPASS: actual OAK worker bypasses CPU YOLO, tracks packets, counts single crossing once and reconciles Passenger total\n"
+  },
+  {
+    "test": "oak_foreign_worker_test.py",
+    "passed": true,
+    "output": "[2026-10-16 21:06:58.593] [depthai] [warning] USB protocol not available - If running in a container, make sure that the following is set: \"-v /dev/bus/usb:/dev/bus/usb --device-cgroup-rule='c 189:* rmw'\"\nPASS: real OAK counter worker uses compiled foreign outputs without CPU YOLO; each class triggers once; OAK ignores PC-only frame interval\nPASS: actual GUI reset denies unauthenticated reset; authenticated reset persists cleared latch\nQStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'\n"
+  },
+  {
+    "test": "auto_schedule_test.py",
+    "passed": true,
+    "output": "[2026-10-16 21:07:01.127] [depthai] [warning] USB protocol not available - If running in a container, make sure that the following is set: \"-v /dev/bus/usb:/dev/bus/usb --device-cgroup-rule='c 189:* rmw'\"\nPASS: startup overrides saved Auto-off/pause; 05:00 inclusive and 17:05 exclusive Brisbane; no early/late starts; immediate in-shift start; 60-second retry; automatic stop\nQStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'\n"
+  },
+  {
+    "test": "oak_integrity_test.py",
+    "passed": true,
+    "output": "[2026-10-16 21:26:12.261] [depthai] [warning] USB protocol not available - If running in a container, make sure that the following is set: \"-v /dev/bus/usb:/dev/bus/usb --device-cgroup-rule='c 189:* rmw'\"\nPASS: LF and Windows CRLF metadata accepted; actual JSON changes and binary corruption rejected\n"
+  }
+]

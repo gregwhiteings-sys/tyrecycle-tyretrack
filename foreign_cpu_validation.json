@@ -1,0 +1,50 @@
+{
+  "model_classes": {
+    "0": "wheel_rim",
+    "1": "person"
+  },
+  "device": "PC CPU / original PT weights, NOT compiled BLOB",
+  "confidence": 0.45,
+  "iou_match": 0.5,
+  "synthetic_only": true,
+  "splits": {
+    "val": {
+      "truth": {
+        "0": 5,
+        "1": 5
+      },
+      "true_positive": {
+        "0": 5,
+        "1": 5
+      },
+      "false_positive": {
+        "0": 0,
+        "1": 0
+      },
+      "false_negative": {
+        "0": 0,
+        "1": 0
+      },
+      "seconds_total": 1.2701660000002448
+    },
+    "test": {
+      "truth": {
+        "0": 5,
+        "1": 5
+      },
+      "true_positive": {
+        "0": 5,
+        "1": 5
+      },
+      "false_positive": {
+        "0": 0,
+        "1": 0
+      },
+      "false_negative": {
+        "0": 0,
+        "1": 0
+      },
+      "seconds_total": 0.14094529599788075
+    }
+  }
+}

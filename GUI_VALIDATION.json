@@ -1,0 +1,32 @@
+{
+  "status": "targeted-local-checks-passed",
+  "checks": [
+    "BGR colours and aspect ratio",
+    "native size Qt paint",
+    "single shared fullscreen frame",
+    "coalesced background CSV work and failure recovery",
+    "slow background database query does not block GUI",
+    "dashboard snapshot applied to counters",
+    "16/16 report checks",
+    "single line",
+    "schedule boundaries",
+    "manual test isolation",
+    "foreign alarm",
+    "Qt controls at three sizes",
+    "two-line hour labels at three sizes",
+    "below-5 flow flash threshold",
+    "DepthAI 2.30 hardware encoder pipeline construction",
+    "H264 stream-copy MP4 playback, segment rotation and packet-gap recovery",
+    "recording disabled and midstream enable",
+    "H264 source preserved on MP4 remux failure",
+    "independent preview and exact AI sequence pairing with encoder branch",
+    "DepthAI 2.30 full sensor ISP/video geometry: 1920x1080 -> 640x360, no centre crop; preview 480x270",
+    "H264 MP4 decoding, keyframe segmentation, packet-gap recovery and disabled recording after FOV correction"
+  ],
+  "pending": [
+    "Windows full source and frozen-runtime smoke tests in GitHub",
+    "production PC live rendering and camera test",
+    "Live OAK hardware encoder and on-site recording performance",
+    "On-camera confirmation that the previous wide conveyor view is restored"
+  ]
+}

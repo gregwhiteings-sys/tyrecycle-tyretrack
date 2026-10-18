@@ -1,0 +1,18 @@
+TYRETRACK SMOOTHER PREVIEW + STALL DIAGNOSTICS
+
+Workflow name stays: TyreTrack Windows Portable (OAK Onboard AI)
+Workflow path: .github/workflows/windows-portable.yml
+
+The CAMERA tab has a new OAK viewing mode:
+- Smooth live (default): independent 480x270 camera stream targeting 15 FPS. Displays the count line and totals. AI boxes/labels and foreign-region graphics are not drawn on newer live frames. Alarm monitoring/dashboard indicators continue separately.
+- Matched AI overlays: analysed frames at the AI rate (previously about 8 FPS). Select Bounding Boxes and/or Show Tyre Labels as before. All overlays stay on their exact inference frame.
+This avoids drawing stale boxes on a moving live image. Video-file display is unchanged.
+
+The detector blob, normalization and count crossing logic are unchanged. Camera rate is now 15 FPS; nonblocking inference inputs select recent frames so AI cannot throttle the preview branch. Integrated AI throughput under the extra stream needs onsite measurement.
+
+Every 10 seconds an OAK stream summary reports camera and neural receive rates, matching rate, sequence-gap totals, maximum packet ages, capture/preview host-loop pauses, counting-worker read gaps, and recorder backlog/drops. AI gaps over one second produce STALL/RECOVERED messages. The existing six-second AI timeout remains. A stream summary identifies observations, not a definitive hardware/network diagnosis. Packet age includes on-device and transport/host queue time.
+
+Repeated per-frame recording warnings are replaced by summaries. Sequence gaps include normal inference skips and host latest-frame selection; they are not labelled proven network loss.
+Recording now uses the independent full-view camera stream at 15 FPS nominal, in 15-minute segments. If frames are dropped, duration may differ from real elapsed time as before.
+
+Deploy in a separate portable folder after backing up existing app data. First try manual test mode, compare 100 physical tyre crossings, and check CPU, live and AI FPS. Send fresh logs after at least 10 minutes or immediately after a stall. No Colab conversion or API key is needed. The Windows frozen build must pass GitHub tests, and live camera performance cannot be verified here.

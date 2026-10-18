@@ -1,0 +1,25 @@
+TYRETRACK OAK ONBOARD AI — INTEGRATION TRIAL
+
+Build workflow: TyreTrack Windows Portable (OAK Onboard AI)
+Workflow path: .github/workflows/windows-portable.yml
+Upload extracted source files at repository root, including oak_ai.py and tyre_detector_oak.blob.
+Run workflow from Actions; download TyreTrack-Windows-x64-Portable artifact after success.
+
+OAK source now runs tyre inference and normalization on its RVC2 processor.
+PC performs NMS, ByteTrack, crossing logic, UI and reporting. Uploaded video still uses the CPU detection-only PT model. The optional foreign-object demo detector still uses CPU.
+No Hub API key or online compiler is required to run the Windows app. Never upload keys.
+
+Trial procedure:
+1 Back up the existing application folder and data before changing builds.
+2 Extract the new portable app into a separate folder. Close the old app and standalone OAK tester.
+3 Start the new app. Use OAK manual test mode first; test counts are isolated from production.
+4 Set the single count line and confirm direction, confidence and camera IP.
+5 OAK uses the full 16:9 conveyor view with internal letterboxing, rather than the standalone square centre crop. Recheck the line placement.
+6 Compare at least 100 crossings manually, including overlaps and gaps. Check Passenger/4x4 totals and CPU usage.
+7 For production use, configure production email and schedule and disable manual test; verify live counts and reports.
+
+Existing 05:00–17:05 Brisbane schedule, report logic, manual test isolation and alert behavior are retained. They have offline tests. Actual startup/reconnect, physical camera performance, classification and count accuracy of this integrated build require an onsite test. The standalone square-view test achieved about 8 FPS; integrated performance has not been measured here.
+
+See SMOOTH_PREVIEW_START_HERE.txt for viewing mode and diagnostics. Recordings remain unannotated 480x270 segments at 15 FPS nominal; output may be lower if inference or transport skips frames. They show the full scene reconstructed from the network letterbox, rather than original high-resolution footage.
+
+This source package is build-ready, not a prebuilt Windows EXE. Windows GitHub source and packaged smoke tests still have to pass. A camera is not available in the build runner; it validates blob integrity and pipeline construction without connecting.

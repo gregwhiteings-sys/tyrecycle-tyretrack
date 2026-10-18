@@ -1,0 +1,21 @@
+{
+  "status": "targeted-local-checks-passed",
+  "checks": [
+    "BGR colours and aspect ratio",
+    "native size Qt paint",
+    "single shared fullscreen frame",
+    "coalesced background CSV work and failure recovery",
+    "slow background database query does not block GUI",
+    "dashboard snapshot applied to counters",
+    "16/16 report checks",
+    "single line",
+    "schedule boundaries",
+    "manual test isolation",
+    "foreign alarm",
+    "Qt controls at three sizes"
+  ],
+  "pending": [
+    "Windows full source and frozen-runtime smoke tests in GitHub",
+    "production PC live rendering and camera test"
+  ]
+}

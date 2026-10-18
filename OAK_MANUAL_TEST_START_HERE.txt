@@ -1,0 +1,40 @@
+OAK MANUAL AFTER-HOURS TEST — START HERE
+
+This is the complete updated source package, both models and Windows workflow.
+Rebuild through GitHub; this ZIP is not a compiled EXE.
+Upload extracted contents and run TyreTrack Windows Portable (Compatibility).
+The workflow path stays .github/workflows/windows-portable.yml.
+
+TONIGHT'S TEST
+1. Close the old TyreTrack and any other app using the OAK camera.
+2. Open this newly built app. Go to CAMERA and select OAK-D S2 PoE / CAT5.
+3. Tick Manual OAK test · any time.
+4. Press START COUNTING. This mode bypasses the production-hour restriction.
+5. It should show OAK TEST and live camera images if the hardware connects.
+   Check detection and counting with actual available footage/tyres.
+6. Press Stop when finished. Keep Auto connect and count enabled if you want
+   the next automatic 05:00 Brisbane production start. Keep app open/PC awake.
+
+TEST DATA
+Manual OAK counts are saved to data/oak_manual_tests.db, not the production DB.
+The dashboard displays test-session totals. No production emails/no-count emails
+are scheduled during manual OAK tests. Foreign-object alarms remain operational
+when their detector is enabled; incidents identify source kind oak_test.
+The test checkbox is not persisted across launches. Automatic starts ignore it.
+
+OVERNIGHT HANDOVER
+With Auto enabled, a running manual test stops at its next 05:00 Brisbane
+boundary. After its worker closes, the normal automatic connection/start resumes
+and uses production data. With Auto disabled, Stop the test yourself.
+A manually started daytime test is intentionally separate for the entire test
+session, until Stop or the next day's 05:00 boundary with Auto enabled.
+Manual Stop in test mode does not pause tomorrow's production schedule.
+Normal production still ends at 17:05 Brisbane. Attempting normal manual Start
+outside these hours now displays an explicit instruction to enable test mode.
+
+IMPORTANT
+This removes the software time restriction for testing. It does not establish
+that PoE power, Ethernet routing, camera discovery or the camera itself works.
+Connection and actual counting must still be verified on the Australian PC.
+If it fails, capture the full error and data/tyretrack.log. No success guarantee
+is implied by the offline checks or a successful Windows build.
