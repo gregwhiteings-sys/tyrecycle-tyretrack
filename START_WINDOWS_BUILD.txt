@@ -1,0 +1,79 @@
+TYRETRACK WINDOWS x64 COMPATIBILITY BUILD
+
+GITHUB SETUP
+Extract this source ZIP first. Upload its CONTENTS into your repository root.
+The app .py, model .pt, requirements-windows.txt, BUILD_WINDOWS.py and
+build_support folder must be at the root, not inside an extra ZIP/folder.
+
+Exact workflow location:
+.github/workflows/windows-portable.yml
+No spaces around the slashes. If GitHub's upload hides .github, choose
+Add file → Create new file and type that exact path, then paste the YAML.
+Remove old malformed paths such as '.github / workflows / ...' using GitHub
+before running: Windows checkout fails BEFORE this workflow can repair them.
+
+Actions → TyreTrack Windows Portable (Compatibility) → Run workflow.
+After success, open the run → Artifacts → TyreTrack-Windows-x64-Portable.
+Extract the artifact download, then extract the portable application ZIP inside.
+Open TyreTrack.exe. Keep _internal and all supplied files together.
+
+COMPATIBILITY CHOICES
+Windows Server 2022 builder; Python 3.12.10 x64.
+CPU torch 2.5.1 + torchvision 0.20.1 as a matched pair.
+NumPy 1.26.4 + SciPy 1.13.1 + OpenCV 4.10.0.84.
+DepthAI 2.30.0.0 for the current Pipeline/ColorCamera/XLinkOut API.
+Pinned PyQt5, Ultralytics, PyInstaller, lap and optree.
+PyInstaller one-folder packaging; no one-file extraction or UPX.
+Explicit model and Ultralytics YAML resources; lap, SciPy, DepthAI,
+torchvision and optree collection. Preserve torch/lib DLLs.
+Move duplicate Qt-local Microsoft runtime DLLs only if a root copy exists.
+Bundled source/EXE checks cover torch, torchvision NMS, SciPy, model load,
+CPU segmentation/tracking and every Qt control page, with auto-camera/email
+scheduling disabled only during build smoke testing. Normal launches retain it.
+Versions and diagnostics saved for troubleshooting. No private email config or
+production DB is bundled; source code, data and model content otherwise retained.
+
+TARGET PC
+Windows 10/11 x64. No separate Python installation required.
+If Windows reports c10.dll / VCRUNTIME140 / MSVCP140 missing or failing,
+run prerequisites/vc_redist.x64.exe once, then reopen the app.
+The official Microsoft installer is bundled and signature-checked in CI.
+Keep your existing installation/data backed up; keep the fresh build separate.
+If migrating, close BOTH apps first, then copy the existing data directory into
+the new application folder to retain counts, settings and private email config.
+Only run one instance against an OAK camera/database at a time.
+
+BUILD LIMITS
+The workflow has been prepared and statically checked, not executed here.
+GitHub must pass dependency installation, source tests and packaged smoke tests
+before it uploads the application. A successful CI run still does not prove
+real-camera connection, production counting accuracy, email delivery or that
+all target PCs have the necessary OS/runtime support. Test on the actual PC.
+If an install/model compatibility check fails, download Diagnostics; do not
+bypass that check or replace pins blindly.
+
+FOREIGN DETECTOR INTEGRATION
+This complete source package includes BOTH tyre_detector.pt and
+foreign_model/foreign_object_detector_DEMO.pt. The workflow embeds and verifies
+both, then tests actual CPU inference from the packaged EXE.
+The prior schedule-test WinError32 cleanup fix is included. Source/packaged
+smoke failures now print their JSON stage and traceback directly in Actions.
+Your previous source-smoke failure is not diagnosed from its wrapper traceback;
+read its uploaded source-smoke.json, or the new detailed log if it fails again.
+
+WINDOWS CONTROL PAGE WIDTH FIX
+Control pages now follow the actual viewport resize (including scrollbar width
+changes) and wrap their descriptions. Layout smoke checks settle pending Qt
+events, name the failing tab and check control bounds. A separate layout test
+renders all five tabs at three window sizes. Linux offscreen checks also ran
+with QT_SCALE_FACTOR=1.5; the Windows workflow must confirm the target platform.
+Update the main app, build_support/smoke_test.py, control_layout_test.py and
+.github/workflows/windows-portable.yml together, or upload all extracted contents.
+
+MANUAL OAK TEST UPDATE
+See OAK_MANUAL_TEST_START_HERE.txt. Manual OAK tests can run at any hour,
+write to a separate test DB and hand back to next 05:00 Auto production start.
+
+DETECTION-ONLY MODEL UPDATE
+This build uses the supplied detection-only tyre_detector.pt. See
+DETECTION_ONLY_START_HERE.txt. Windows smoke now requires task=detect.

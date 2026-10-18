@@ -1,0 +1,1 @@
+Current runtime model: foreign_object.pt, classes 0 wheel_rim, 1 person. Trained on 39 synthetic video frames. See OAK_DUAL_AI_START_HERE.txt. No general debris coverage or independent real-world validation. The old foreign_object_detector_DEMO.pt is historical only and is not loaded.

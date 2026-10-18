@@ -1,0 +1,17 @@
+TYRETRACK GUI RENDERING OPTIMIZATION
+
+Workflow stays: TyreTrack Windows Portable (OAK Onboard AI)
+Path: .github/workflows/windows-portable.yml
+Upload all extracted files at repository root, including NEW background_export.py and tests. Model files are unchanged; no Colab conversion required. Build with GitHub and extract the Windows artifact into a separate folder for testing.
+
+Changes:
+- Prepare a native-size BGR frame once. Fullscreen and dashboard share it.
+- Qt paints to the aspect-correct rectangle without replacing/scaling QLabel pixmaps on every frame. Hidden dashboard video is not repainted during fullscreen.
+- Production CSV exports run on one background worker with coalesced requests. Counts are still committed before the count signal.
+- Dashboard database snapshots are collected off the GUI thread. Cards refresh about once per second; live frame totals remain tied to the worker.
+- Avoid repeated hourly-slot stylesheet changes when styles are unchanged.
+- PERF GUI stages logs frame preparation, callback intervals, dashboard collection/application and maximum image paint time. Collection is background time; callback interval is elapsed time between timer calls, not render duration.
+
+Keep Smooth live selected for the independent preview. Matched AI overlays remains available at the detector rate. Detector blob, count crossing rule, schedule, foreign alarm logic, and stream diagnostics are unchanged. CSV exports are asynchronous; if an export fails the committed SQLite data remains the source for recovery.
+
+After deployment run for at least 10 minutes in the same normal/fullscreen/remote-desktop conditions and send data/tyretrack.log. Compare 100 crossings manually. We cannot guarantee 15 FPS or removal of stalls until measured on the production PC.

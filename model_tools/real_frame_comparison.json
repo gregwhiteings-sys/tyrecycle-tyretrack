@@ -1,0 +1,52 @@
+[
+  {
+    "seconds": 0,
+    "boxes": 5,
+    "max_difference": 0.0
+  },
+  {
+    "seconds": 5,
+    "boxes": 5,
+    "max_difference": 0.0
+  },
+  {
+    "seconds": 10,
+    "boxes": 6,
+    "max_difference": 0.0
+  },
+  {
+    "seconds": 20,
+    "boxes": 4,
+    "max_difference": 0.0
+  },
+  {
+    "seconds": 40,
+    "boxes": 5,
+    "max_difference": 0.0
+  },
+  {
+    "seconds": 80,
+    "boxes": 3,
+    "max_difference": 0.0
+  },
+  {
+    "seconds": 120,
+    "boxes": 5,
+    "max_difference": 0.0
+  },
+  {
+    "seconds": 200,
+    "boxes": 5,
+    "max_difference": 0.0
+  },
+  {
+    "seconds": 300,
+    "boxes": 3,
+    "max_difference": 0.0
+  },
+  {
+    "seconds": 500,
+    "boxes": 5,
+    "max_difference": 0.0
+  }
+]

@@ -1,0 +1,15 @@
+# Windows x64 / Python 3.12. CPU torch wheels are installed separately.
+pyinstaller==6.22.3
+numpy==1.26.4
+scipy==1.13.1
+opencv-python==4.10.0.84
+PyQt5==5.15.11
+ultralytics==8.4.174
+depthai==2.30.0.0
+optree==0.13.1
+lap==0.5.12
+torch==2.5.1+cpu
+torchvision==0.20.1+cpu
+
+# Bundled FFmpeg libraries: remux camera H264 into MP4, no PC video encoding.
+av==16.1.0

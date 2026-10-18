@@ -1,0 +1,12 @@
+TYRETRACK — GITHUB WINDOWS BUILD (LAST WORKING DUAL OAK + FOUR CHANGES)
+
+1. Create a NEW EMPTY GitHub repository (recommended), or a new branch of your existing repository.
+2. Extract this ZIP on your computer. Upload ALL EXTRACTED FILES AND FOLDERS to the repository root. Do not upload the ZIP as a single file. Preserve .github/workflows/windows-portable.yml exactly.
+3. GitHub web upload may not preserve hidden .github folders; if missing, use Add file > Create new file with the exact path .github/workflows/windows-portable.yml and paste the workflow contents.
+4. In GitHub open Actions > TyreTrack Windows Portable (OAK Onboard AI) > Run workflow. Choose the branch you uploaded to.
+5. Wait for a green check. Open that run > Artifacts > TyreTrack-Windows-x64-Portable. Download, unzip, then unzip the application ZIP inside. Keep all files in the portable folder together.
+6. If red, download TyreTrack-Build-Diagnostics and share the failing step log. Each source test is capped at 90 seconds; a stuck foreign-object test now FAILS CLEARLY instead of waiting 20 minutes.
+7. Keep the working production install unchanged. Test new build separately, especially OAK connection, counts, alarm, schedule, reports and PIN, before switching.
+
+IMPORTANT: Source contains a known administrator PIN; do NOT upload to a public repository. Make the repository PRIVATE, and change PIN before deploying.
+GitHub Windows EXE build has NOT been executed or verified here. Python source syntax and ZIP integrity can be checked locally; hardware requires the actual PC.

@@ -1,0 +1,72 @@
+TYRETRACK COMPLETE APP WITH FOREIGN OBJECT ALARM — DEMO
+
+BUILD / INSTALL
+This ZIP contains complete Python source, BOTH models and the GitHub Windows
+build workflow. It is NOT an already-compiled Windows EXE. Upload its extracted
+contents to the repository root, including foreign_model and build_support.
+Use .github/workflows/windows-portable.yml and run the Compatibility workflow.
+Follow START_WINDOWS_BUILD.txt for the artifact download and VC runtime details.
+Stop the old app before testing this version. Keep a separate backup of it/data.
+
+FIRST USE
+1. Open the FOREIGN tab (tab arrow buttons reveal tabs on narrow screens).
+2. Choose Set / change admin password. Set at least 6 characters and keep it.
+   No default/admin password is shipped. Existing password is required to change it.
+3. Enable foreign-object detector. It is initially off, pending your region check.
+4. Stop counting before changing detector settings. Adjust the trapezoid:
+   top/bottom and bottom-left/right are percentages of the image. The top is
+   automatically narrower. Detection box CENTRES must be inside this region.
+5. Start with your VIDEO file for testing. Video tests can also latch alarms;
+   incidents clearly identify video/camera/OAK sources.
+6. Start counting. Orange outline is the monitored region, red boxes are foreign
+   proposals. Foreign-enabled OAK preview uses processed frames to keep overlays
+   matched; preview/inference can be slower with two models.
+
+ALARM BEHAVIOUR
+A known object class must appear in 3 consecutive foreign checks with spatial
+box overlap (IoU >=0.2), maximum 5 seconds between checks, before the alarm latches.
+Defaults: 65% confidence, foreign check every 5 PROCESSED frames, inference size480.
+This is sampled detection, not a guaranteed response time. Very fast/brief
+objects may not meet confirmation; lower the sampling interval and test on site.
+Classes enabled: fitted rim, bare rim, person, metal object, traffic cone.
+The supplied 'other_foreign_object' class has no verified training examples,
+so it is intentionally excluded from alarm decisions. The model cannot detect
+every possible unfamiliar object. Fitted-rim labels refer to visible rim faces.
+
+A confirmed object triggers a red banner and continuous looping WAV alarm on
+Windows. Set Windows speaker volume appropriately. Alarm stays latched when the
+object leaves, after Stop, or if the detector is disabled. It persists to disk
+and resumes after restarting the app. Sound cannot continue while the app/PC is
+closed or off. On other OSes the app uses a repeated system beep as fallback.
+Use Admin: reset latched alarm and enter the password. An object still present
+can trigger another alarm after 3 new confirmations. The app does not stop or
+control the conveyor. If a model fails, tyre counting continues and a visible
+FOREIGN DETECTOR FAULT banner appears; restart counting to reload the model.
+
+INCIDENTS
+The first event in each latched alarm saves timestamp (Brisbane UTC+10), class,
+confidence, source type/name, bounding box, annotated JPEG and JSON. An incidents
+CSV is appended under data/foreign_incidents. While already latched, further
+objects do not create repeated incidents. Click Open incident records on Windows.
+Admin credentials (salted PBKDF2 hash) and persistent latch are under
+ data/private_config. This is local app-level access control, not OS security.
+
+PRESERVED
+Single counting line and tyre classifier; counts are not incremented by foreign
+objects. Existing 05:00–17:05 Brisbane OAK schedule, reporting, best daily/hour,
+flow labels and timestamped no-count alerts remain. Existing data can be copied
+with both app instances closed; do not overwrite your production DB with tests.
+
+VALIDATION / LIMITS
+Offline tests: 16 report checks, schedule/boundaries, single-line counting,
+foreign confirmation/spatial gates, password verification/persistence. Qt layout
+was rendered at 1366x768 and 1280x720 with inference stubbed; exercised alarm
+records, banner, persistence/admin reset and worker signal/latch/fault paths.
+Windows EXE packaging, actual model inference under the pinned Windows stack,
+Windows alarm audio, OAK hardware and field accuracy still need testing.
+The workflow performs source and packaged model inference/Qt checks before
+publishing an artifact. It will not bypass a failed test.
+
+This foreign model was trained on automatic labels and apparently composited
+objects. It is experimental. It cannot replace a certified person-safety system.
+Model-training limitations are in foreign_model/MODEL_LIMITATIONS.txt.

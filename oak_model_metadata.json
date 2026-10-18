@@ -1,0 +1,24 @@
+{
+  "task": "detect",
+  "classes": [
+    "passenger",
+    "4x4"
+  ],
+  "imgsz": 384,
+  "input_name": "images",
+  "output_name": "output0",
+  "output_shape": [
+    1,
+    6,
+    3024
+  ],
+  "input_layout": "NCHW RGB 0..255; explicit Div by 255 inside ONNX",
+  "onnx_sha256": "481e55241dc4b9a3a7f8b683b32040e114afb9df0ceb01448e732eb32d2c6621",
+  "opset": 12,
+  "onnx_vs_torch_max_difference": 0.000244140625,
+  "rvc2_compilation": "included detection-only RGB U8 blob; hardware test pending",
+  "hardware_test": "not yet run",
+  "export_validation": "ONNX checker + ONNXRuntime/PyTorch comparison passed",
+  "compiled_input_contract": "RGB_U8_DIV255_IN_ONNX_GRAPH",
+  "normalization_verification_max_abs": 0.0
+}

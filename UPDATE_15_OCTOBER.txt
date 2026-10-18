@@ -1,0 +1,40 @@
+TYRETRACK — 15 October update
+
+Flow rate and best flow now show tyres per min.
+Best Daily shows the highest stored OAK 05:00–17:05 Brisbane shift total
+(including today) and its date. Video/webcam counts are excluded.
+No-count dashboard displays latest 10-minute threshold timestamp; hover for
+all threshold times today. Email includes monitoring start and threshold time.
+Dashboard no-count history is calculated from recorded count gaps, not camera
+availability; live email alerts require receiving camera frames.
+
+Automatic OAK schedule is enabled by default, with a switch in CAMERA & VIDEO
+SOURCE. Starts at 05:00 Brisbane and ends at 17:05 (5:05 pm). Opening the app
+within shift hours also starts OAK automatically. Failed connections retry
+at most once per 60 seconds without blocking error dialogs. Video tests are
+not interrupted. Manual Stop pauses automatic start for the current Brisbane
+date; re-enable the schedule switch or press Start to resume. Schedule uses
+Brisbane time regardless of the Windows timezone. Emails can finish sending
+after the automatic camera stop. No new OAK counts are accepted after cutoff.
+
+Keep the app open, PC awake, camera powered and connected. This does not power
+on the PC or launch the app after reboot. Stop/close the previous version first.
+For an existing Python installation, replace the main Python source beside
+count_line.py, hourly_dashboard.py and tyre_detector.pt. Keep existing data and
+email settings. For an EXE installation, rebuild using the supplied GitHub
+workflow; this ZIP contains source and model, not a newly built Windows EXE.
+
+Validation: source compilation, original 16 report checks, and offline schedule,
+shift-boundary, timestamp and best-daily checks pass. Windows UI, OAK connection
+and real SMTP delivery have not been tested here. Original detector weights and
+single-line counting now replaces the previous two-line union logic.
+
+Single-line update: one adjustable COUNT LINE; removed second line, its slider,
+front/end/both totals and separation validation. Each tracked ID counts once
+at the remaining line in the selected direction. Existing saved primary line
+position, length and angle are kept. Single-line crossing checks pass.
+
+Layout update: Best Daily moved beside Best Hour in the top row. Control
+panel widened; schedule description wraps; control-page labels and dropdowns
+fit the viewport. Offscreen Qt rendering checked all four tabs at 1366x768
+and 1280x720. Camera/inference dependencies were stubbed for layout checks.

@@ -1,0 +1,19 @@
+TYRETRACK V5 TEST CANDIDATE — 2026-10-13
+
+Changes:
+- Larger top-right BEST HOUR card with bold green number.
+- Bottom dashboard: AVERAGE HOURLY PRODUCTION (completed hours including zero counts).
+- Bottom dashboard: BEST FLOW AVERAGE TODAY (best completed-slot tyres/min).
+- Monitoring snapshot includes no-count time from 05:00 before first count.
+- Live OAK no-count email timer begins on first received live frame (not first tyre).
+- After successful final hourly email, daily production summary sent once after 17:05 Brisbane.
+- Existing detector and line counting routines are untouched.
+
+IMPORTANT VALIDATION LIMITS:
+- 05:00 start alert requires the app and live camera to be running; if no frames arrive, no email is sent.
+- Best flow is the highest completed hourly-slot average, not a rolling-minute peak.
+- No-flow time is calculated from count gaps; it does not verify actual machine downtime.
+- The HOURS detail tab still shows legacy Best/Lowest hour cards; the dashboard changes are the priority.
+- Daily report is sent after final hourly email succeeds; needs configured email.ini.
+- Python syntax compiled successfully. Not yet runtime-tested on Windows/OAK hardware.
+- Keep production application and its data directory unchanged until on-site validation.

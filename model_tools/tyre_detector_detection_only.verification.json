@@ -1,0 +1,41 @@
+{
+  "source": "complete_app/tyre_detector.pt",
+  "output": "detection_only/tyre_detector_detection_only.pt",
+  "task": "detect",
+  "classes": {
+    "0": "passenger",
+    "1": "4x4"
+  },
+  "removed": [
+    "proto",
+    "cv4",
+    "nm",
+    "npr"
+  ],
+  "saved_precision": "FP16; surviving tensor round-trip checked",
+  "original_parameters": 10083062,
+  "detection_parameters": 9428566,
+  "box_equivalence_checks": [
+    {
+      "size": 320,
+      "max_box_score_difference": 0.0,
+      "shape": [
+        1,
+        6,
+        2100
+      ]
+    },
+    {
+      "size": 480,
+      "max_box_score_difference": 0.0,
+      "shape": [
+        1,
+        6,
+        4725
+      ]
+    }
+  ],
+  "reload_and_predict": "passed",
+  "field_accuracy": "not tested",
+  "warning": "Counting anchor changes from mask bottom to bounding-box bottom; revalidate line counts."
+}
