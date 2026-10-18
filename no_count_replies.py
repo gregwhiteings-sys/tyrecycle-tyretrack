@@ -7,6 +7,7 @@ import email
 import imaplib
 import re
 import sqlite3
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from email.header import decode_header, make_header
 from email.utils import getaddresses, parseaddr
@@ -23,25 +24,40 @@ ID_RE = re.compile(r'NC-\d{8}-\d{6}', re.I)
 FIELD_RE = re.compile(r'^\s*(?:REASON|SUPERVISOR|COMMENTS)\s*:\s*(.*)$', re.I)
 
 
+@contextmanager
+def db_connection(db):
+    """Commit/rollback transactions AND close the connection on Windows.
+
+    sqlite3.Connection.__exit__ commits or rolls back but does not close.
+    An open connection can lock test.db and prevent TemporaryDirectory cleanup.
+    """
+    con = sqlite3.connect(db, timeout=15)
+    try:
+        with con:
+            yield con
+    finally:
+        con.close()
+
+
 def ensure_table(con):
     con.execute(SCHEMA)
 
 
 def create_incident(db, incident_id, start, threshold):
-    with sqlite3.connect(db, timeout=15) as con:
+    with db_connection(db) as con:
         ensure_table(con)
         con.execute('INSERT OR IGNORE INTO supervisor_no_count (incident_id,started_brisbane,threshold_brisbane,emailed_utc) VALUES (?,?,?,?)',
                     (incident_id, start, threshold, datetime.now(timezone.utc).isoformat()))
 
 
 def close_incident(db, when):
-    with sqlite3.connect(db, timeout=15) as con:
+    with db_connection(db) as con:
         ensure_table(con)
         con.execute('UPDATE supervisor_no_count SET ended_brisbane=? WHERE ended_brisbane IS NULL', (when,))
 
 
 def summary(db, day):
-    with sqlite3.connect(db, timeout=15) as con:
+    with db_connection(db) as con:
         ensure_table(con)
         rows = con.execute('SELECT incident_id,status,COALESCE(reason,\'Awaiting supervisor reply\'),COALESCE(supervisor,\'\'),started_brisbane,COALESCE(ended_brisbane,\'\') FROM supervisor_no_count WHERE started_brisbane LIKE ? ORDER BY started_brisbane', (day+'%',)).fetchall()
     if not rows:
@@ -87,7 +103,7 @@ def parse_reply(subject, body):
 
 
 def record_reply(db, incident_id, reason, supervisor, comments, message_id):
-    with sqlite3.connect(db, timeout=15) as con:
+    with db_connection(db) as con:
         ensure_table(con)
         cur=con.execute('UPDATE supervisor_no_count SET status=?, reason=?, supervisor=?, comments=?, received_utc=?, message_id=? WHERE incident_id=? AND status != ? AND (message_id IS NULL OR message_id != ?)',
             ('COMPLETED',reason,supervisor,comments,datetime.now(timezone.utc).isoformat(),message_id,incident_id,'COMPLETED',message_id))
