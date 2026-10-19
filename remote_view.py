@@ -1,5 +1,6 @@
 """Read-only Tailscale viewer. Binds exclusively to localhost."""
 import json
+from contextlib import closing
 import sqlite3
 import threading
 import time
@@ -32,7 +33,7 @@ class Viewer:
                     elif path == '/api/status':
                         with owner.lock: data = dict(owner.state)
                         # Read-only connection: never alters the production database.
-                        with sqlite3.connect(owner.db.resolve().as_uri()+'?mode=ro', uri=True, timeout=1) as con:
+                        with closing(sqlite3.connect(owner.db.resolve().as_uri()+'?mode=ro', uri=True, timeout=1)) as con:
                             exists = con.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='supervisor_no_count'").fetchone()
                             data['reports'] = con.execute("SELECT incident_id,started_brisbane,threshold_brisbane,ended_brisbane,status,reason,supervisor,comments FROM supervisor_no_count ORDER BY started_brisbane DESC LIMIT 200").fetchall() if exists else []
                         payload, mime = json.dumps(data).encode(), 'application/json'

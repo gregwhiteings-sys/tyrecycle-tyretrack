@@ -1,5 +1,6 @@
 """Exercise the read-only HTTP service without camera or AI dependencies."""
 import json
+from contextlib import closing
 from pathlib import Path
 import sqlite3
 import tempfile
@@ -9,9 +10,10 @@ from remote_view import Viewer
 from no_count_replies import SCHEMA
 with tempfile.TemporaryDirectory() as folder:
     db = Path(folder)/'test.db'
-    with sqlite3.connect(db) as con:
+    with closing(sqlite3.connect(db)) as con:
         con.execute(SCHEMA)
         con.execute("INSERT INTO supervisor_no_count(incident_id,started_brisbane,threshold_brisbane,status,reason,supervisor,comments,emailed_utc) VALUES (?,?,?,?,?,?,?,?)", ('NC-1','2026-10-19 05:00','2026-10-19 05:10','COMPLETED','Maintenance','Sam','<script>alert(1)</script>','now'))
+        con.commit()
     before=db.read_bytes()
     v=Viewer(db,port=0)
     try:
