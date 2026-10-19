@@ -1,0 +1,68 @@
+TYRETRACK REMOTE VIEWER — 19 OCTOBER 2026
+
+This ZIP contains updated SOURCE, not a compiled Windows executable.
+Build it with the included GitHub Actions workflow as with previous builds.
+Upload the extracted contents to the repository root (including remote_view.py
+and the .github/workflows folder). Run the Windows Portable workflow and install
+the resulting artifact in a NEW folder. Preserve your existing production data
+and private_config using the same data location as the current application.
+Do not delete or overwrite your existing database, email settings, model files,
+or working installation. Keep a backup of the working folder before updating.
+
+For a source-based installation using the same Python environment:
+Close TyreTrack using its admin procedure. Back up and replace these files:
+  TyreTrack_Production_Monitor.py
+  remote_view.py (new)
+BUILD_WINDOWS.py is updated for future executable builds.
+Simply copying a .py next to an existing compiled EXE does not update that EXE.
+
+Run only one TyreTrack instance against the production database/camera.
+
+WHAT THIS ADDS
+- Local read-only server: http://127.0.0.1:8765
+- Camera view updates approximately every 2 seconds; this is a monitoring
+  preview, not full-frame-rate desktop streaming or remote control.
+- Full-screen camera button; production counters, flow rate, best hour/day,
+  production/test status and latched foreign-object alarm indication.
+- Latest 200 recorded no-count incidents, reasons, supervisor names/comments.
+- Existing Gmail alert/reply process continues unchanged. Browser replies,
+  alarm reset and remote settings edits are deliberately unavailable.
+- Captures only the camera widget, excluding settings and passwords.
+- No browser alarm sound; the local application remains responsible for alarms.
+- Status stale indicator if the app stops publishing for more than 15 seconds.
+
+ON THE AUSTRALIAN PC AFTER INSTALLING THE NEW BUILD
+1. Start TyreTrack. Open http://127.0.0.1:8765 in Chrome.
+2. Check counters, report rows and camera preview. Reports may be empty if no
+   incidents have been recorded. In video/manual tests, counters show TEST
+   status while the report table still shows recorded production incidents.
+3. Your existing Tailscale Serve setting is already configured:
+   https://ozcomcmshredder.tailb54366.ts.net/
+   -> http://127.0.0.1:8765
+4. Test that HTTPS address while connected to Tailscale.
+5. If 8765 is already occupied, the app logs a viewer startup error and keeps
+   running. Identify the other service rather than stopping unrelated programs.
+
+OTHER VIEWERS
+Install Tailscale on each viewer computer/phone. Each person should use their
+own account. From the Tailscale admin console, share ONLY the Australian machine
+with the intended viewer, or invite the person to the company tailnet with
+appropriate access rules. Do not share your login credentials.
+Once the invitation is accepted and access rules permit HTTPS port 443 to the
+Australian machine, open:
+  https://ozcomcmshredder.tailb54366.ts.net/
+The link is private to authorized Tailscale users. Do not enable Funnel.
+Device sharing can permit other ports unless access rules restrict them; review
+those rules when granting browser-only access.
+
+AVAILABILITY
+The Australian PC must be awake, online, connected to Tailscale and running
+TyreTrack. Tailscale Serve alone does not start TyreTrack. Preview is refreshed
+from the app's current camera widget; no new camera connection is opened.
+
+VALIDATION COMPLETED HERE
+Python syntax checks; HTTP integration test for counters/reports/preview,
+localhost-only binding, blocked unknown paths, unsupported POST, database
+unchanged after reads; existing Gmail reply tests.
+Windows GUI, physical camera and full Windows executable build require testing
+on the Windows build/yard PC; they were not available in this environment.
