@@ -2338,6 +2338,39 @@ class Main(QMainWindow):
         self.clock.timeout.connect(self.tick)
         self.clock.start(1000)
         self.tick()
+        self.start_remote_viewer()
+
+    def start_remote_viewer(self):
+        try:
+            from remote_view import Viewer
+            self.remote_viewer = Viewer(DB)
+            self.remote_timer = QTimer(self)
+            self.remote_timer.timeout.connect(self.publish_remote_view)
+            self.remote_timer.start(2000)
+            log("Read-only viewer ready on 127.0.0.1:8765 (Tailscale Serve)")
+        except Exception as exc:
+            log(f"Remote viewer unavailable: {exc}")
+
+    def publish_remote_view(self):
+        if self.closing: return
+        try:
+            from PyQt5.QtCore import QBuffer, QIODevice
+            # Only the camera widget is captured; settings and passwords are excluded.
+            image = self.video.grab()
+            buffer = QBuffer()
+            buffer.open(QIODevice.WriteOnly)
+            image.save(buffer, "JPG", 70)
+            cards = {"Status":self.production_status_lbl.text(),
+                "Flow rate":self.flow_lbl.text(), "Best hour":self.session_lbl.text(),
+                "Best daily":self.best_daily_lbl.text(),
+                "This hour":self.hour_lbl.text(), "Today":self.day_lbl.text(),
+                "All time":self.total_lbl.text(), "Passenger":self.passenger_lbl.text(),
+                "4×4/SUV":self.suv_lbl.text(), "No-count alerts":self.no_count_lbl.text(),
+                "No-flow time":self.gap_lbl.text(),
+                "Foreign object alarm":"ACTIVE" if self.alarm_state.get("latched") else "Clear"}
+            self.remote_viewer.publish(cards, brisbane_now().strftime("%Y-%m-%d %H:%M:%S"), bytes(buffer.data()))
+        except Exception as exc:
+            log(f"Remote snapshot failed: {exc}")
 
     def card(self, heading):
         frame = QFrame()
@@ -4281,6 +4314,8 @@ class Main(QMainWindow):
         exporter = getattr(self, "_csv_exporter", None)
         if exporter is not None and not exporter.wait(3):
             log("CSV export still finishing at close; committed counts remain in SQLite")
+        if hasattr(self, "remote_timer"): self.remote_timer.stop()
+        if hasattr(self, "remote_viewer"): self.remote_viewer.close()
         self.stop_alarm_sound()
         event.accept()
 
